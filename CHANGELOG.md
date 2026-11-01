@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-01
+
 ### Added
 
 - Initial C# port of [polypartition](https://github.com/ivanfratric/polypartition): `Polygon`,
@@ -19,4 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hole) with workarounds, building an index buffer from point ids, and choosing an algorithm for
   many holes. The XML docs of the affected methods note the same limitations.
 
-[Unreleased]: https://github.com/HanJaeJoon/PolyPartitionSharp/commits/main
+[Unreleased]: https://github.com/HanJaeJoon/PolyPartitionSharp/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/HanJaeJoon/PolyPartitionSharp/releases/tag/v0.1.0
