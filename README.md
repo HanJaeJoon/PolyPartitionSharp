@@ -39,6 +39,35 @@ Use `Polygon.SetOrientation(PolygonOrientation.CounterClockwise)` to fix the win
 Each `PolygonPoint` carries a user `Id` that is copied into the output, so output vertices can be
 mapped back to the input.
 
+### Index buffer
+
+Use vertex buffer indices as point ids, then read the ids back from the triangles. The `Vector2`
+constructor gives every point id 0, so build the polygons from `PolygonPoint`s instead.
+
+``` c#
+Vector2[] vertices = [new(0, 0), new(4, 0), new(4, 4), new(0, 4), new(1, 1), new(1, 3), new(3, 3), new(3, 1)];
+var outer = new Polygon(Enumerable.Range(0, 4).Select(i => new PolygonPoint(vertices[i], i)));
+var hole = new Polygon(Enumerable.Range(4, 4).Select(i => new PolygonPoint(vertices[i], i)), isHole: true);
+
+if (PolyPartition.TryTriangulateEC([outer, hole], out List<Polygon> triangles))
+{
+    int[] indices = triangles.SelectMany(t => t.Select(p => p.Id)).ToArray();
+}
+```
+
+## Input requirements
+
+- Every polygon is simple: no self-intersections, no zero-width spikes.
+- No repeated closing vertex (GeoJSON and SVG repeat the first point at the end; drop it).
+- No consecutive duplicate vertices.
+- Finite coordinates (no NaN or Infinity).
+- Non-hole polygons counter-clockwise, holes clockwise, and every hole strictly inside its outer
+  polygon (not touching its edges or vertices).
+
+Other input is not rejected up front. Depending on the algorithm it returns `false`, or `true` with
+zero-area or clockwise triangles, non-convex parts, or NaN areas; see the
+[per-algorithm table](https://github.com/HanJaeJoon/PolyPartitionSharp/blob/main/docs/dogfooding/round1.md#degenerate-input-that-is-out-of-contract-but-common).
+
 ## Algorithms
 
 | Method | Upstream | Holes | Time | Notes |
@@ -53,6 +82,25 @@ mapped back to the input.
 
 Every method returns `false` where upstream returns 0. Vertex positions are `System.Numerics.Vector2`;
 all geometry is computed in double precision, as upstream does.
+
+With many holes, `TryTriangulateMONO` is much faster than `TryTriangulateEC` (about 160x at 400 holes,
+since EC and HM remove holes in O(h n^2)), but see limitation B below.
+
+## Known limitations (inherited from upstream)
+
+These are upstream behaviors, kept so results stay identical to polypartition. In each case the method
+returns `true` with wrong output:
+
+- **A. `TryConvexPartitionOPT` can return non-convex parts** (about 5% of random simple polygons;
+  areas still add up). Workaround: check every part for convexity before using it, e.g. as a collider.
+- **B. `TryMonotonePartition` with holes can return pieces that are neither simple nor monotone**
+  (about 7% of random polygons with holes; `TryTriangulateMONO` then returns `false`).
+  Workaround: prefer `TryTriangulateEC` for polygons with holes, or validate the MONO pieces.
+- **C. MONO accepts a counter-clockwise hole and fills it**: `TryTriangulateMONO` and
+  `TryMonotonePartition` triangulate the hole as solid (EC and HM return `false`).
+  Workaround: call `SetOrientation(PolygonOrientation.Clockwise)` on every hole before MONO.
+
+Repro inputs and numbers: [dogfooding round 1](https://github.com/HanJaeJoon/PolyPartitionSharp/blob/main/docs/dogfooding/round1.md#upstream-defects-reproduced-by-the-port).
 
 ## License
 

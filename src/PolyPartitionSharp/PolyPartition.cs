@@ -92,6 +92,12 @@ public static partial class PolyPartition
     /// have to be in counter-clockwise order. Vertices of all hole polygons have to be in clockwise order.
     /// </param>
     /// <param name="triangles">A list of triangles (result).</param>
+    /// <remarks>
+    /// Inherited from upstream: with holes, this can return <see langword="false"/> where
+    /// <see cref="TryTriangulateEC(IEnumerable{Polygon}, out List{Polygon})"/> succeeds, and a
+    /// counter-clockwise hole is not rejected but filled as a solid polygon. Orient every hole
+    /// clockwise first.
+    /// </remarks>
     public static bool TryTriangulateMONO(IEnumerable<Polygon> polygons, out List<Polygon> triangles)
     {
         triangles = [];
@@ -107,6 +113,12 @@ public static partial class PolyPartition
     /// have to be in counter-clockwise order. Vertices of all hole polygons have to be in clockwise order.
     /// </param>
     /// <param name="monotonePolygons">A list of monotone polygons (result).</param>
+    /// <remarks>
+    /// Inherited from upstream: with holes, this can return <see langword="true"/> with a piece that is
+    /// neither simple nor monotone, and a counter-clockwise hole is not rejected but filled as a solid
+    /// polygon. Prefer <see cref="TryTriangulateEC(IEnumerable{Polygon}, out List{Polygon})"/> for
+    /// polygons with holes or validate the pieces, and orient every hole clockwise first.
+    /// </remarks>
     public static bool TryMonotonePartition(IEnumerable<Polygon> polygons, out List<Polygon> monotonePolygons)
     {
         monotonePolygons = [];
@@ -149,10 +161,15 @@ public static partial class PolyPartition
     /// Keil-Snoeyink algorithm. For reference, see M. Keil, J. Snoeyink, "On the time bound for
     /// convex decomposition of simple polygons", 1998.
     /// Time complexity: O(n^3), n is the number of vertices. Space complexity: O(n^3).
-    /// As upstream, a polygon with only 3 vertices is rejected (returns <see langword="false"/>).
+    /// As upstream, a polygon with only 3 vertices is rejected (returns <see langword="false"/>), and
+    /// polygons with collinear or duplicate vertices can also be rejected.
     /// </summary>
     /// <param name="polygon">An input polygon to be partitioned. Vertices have to be in counter-clockwise order.</param>
     /// <param name="parts">Resulting list of convex polygons.</param>
+    /// <remarks>
+    /// Inherited from upstream: this can return <see langword="true"/> with a part that is not convex.
+    /// Check every part for convexity if it matters (for example, physics colliders).
+    /// </remarks>
     public static bool TryConvexPartitionOPT(Polygon polygon, out List<Polygon> parts)
     {
         parts = [];

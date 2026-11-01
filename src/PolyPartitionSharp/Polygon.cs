@@ -38,13 +38,16 @@ public sealed class Polygon : IReadOnlyList<PolygonPoint>
         IsHole = isHole;
     }
 
-    /// <summary>Whether the polygon is a hole.</summary>
+    /// <summary>Gets or sets whether the polygon is a hole.</summary>
     public bool IsHole { get; set; }
 
     /// <summary>The number of points.</summary>
     public int Count => _points.Length;
 
-    /// <summary>Whether the polygon has at least 3 points.</summary>
+    /// <summary>
+    /// Gets whether the polygon has at least 3 points. This is the only check: it does not test that
+    /// the polygon is simple, finite, or correctly oriented.
+    /// </summary>
     public bool IsValid => _points.Length >= 3;
 
     /// <summary>Gets or sets the point at <paramref name="index"/>.</summary>

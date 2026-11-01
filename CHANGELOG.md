@@ -14,5 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `TryRemoveHoles`, `TryTriangulateEC`, `TryTriangulateOPT`, `TryTriangulateMONO`,
   `TryMonotonePartition`, `TryConvexPartitionHM`, and `TryConvexPartitionOPT`.
   Outputs match the upstream test fixtures exactly.
+- README sections on input requirements, known limitations inherited from upstream (non-convex
+  `TryConvexPartitionOPT` parts, invalid MONO pieces with holes, MONO filling a counter-clockwise
+  hole) with workarounds, building an index buffer from point ids, and choosing an algorithm for
+  many holes. The XML docs of the affected methods note the same limitations.
 
 [Unreleased]: https://github.com/HanJaeJoon/PolyPartitionSharp/commits/main
